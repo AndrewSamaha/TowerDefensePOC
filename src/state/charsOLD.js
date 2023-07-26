@@ -1,6 +1,5 @@
-import { observable, observe } from "@legendapp/state"
+import { create } from 'zustand';
 import { makeBug, makeTower } from '../generators/units';
-import { create } from "lodash";
 
 export const useCharStoreOld = create((set) => ({
     chars: [],
@@ -27,7 +26,6 @@ export const useCharStoreOld = create((set) => ({
 }));
 
 const createInitialGameState = () => {
-
     console.log('creating initial game state')
     const initialState = {
         numTowers: 2,
@@ -43,10 +41,7 @@ const createInitialGameState = () => {
         const A = makeTower();
         chars[A.id] = A;
     }
-    return {
-        dict: chars,
-        idArray: Object.keys(chars)
-    };
+    return chars;
 }
 export const useCharStore = create((set) => ({
     chars: createInitialGameState(),
@@ -64,5 +59,3 @@ export const useCharStore = create((set) => ({
         const newChars = Object.entries(state.chars).filter(([key, char]) => !char.remove)
     })
 }));
-
-export const charsObservable = observable(createInitialGameState());

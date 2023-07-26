@@ -1,33 +1,25 @@
 import React, { useState } from 'react';
 import { useAnimationFrame } from '@haensl/react-hooks';
 import PropTypes from 'prop-types';
-import { useCharStore } from '../../../state/chars';
+import { observer } from "@legendapp/state/react"
+// import { useCharStore } from '../../../state/chars';
+import { charsObservable } from '../../../state/chars';
 import { MOVETYPES, makeBullet } from '../../../generators/units';
 import { rndDirNudge, rndSpeedNudge, straightLineMove, rndDir } from '../../../helpers/physics';
 
-export const Char = ({charData, mapParams, updateLayerState}) => {
-  const [, updateState] = useState();
-  const { id } = charData;
-  const char = useCharStore((state) => state.chars[id]);
-  //if (!char) return (<></>)
-  const [ addChar, removeChar ] = useCharStore((state) => [state.addChar, state.removeChar])
-  const { representation, pos, moves, maxAge, history, shoots, shotsPerSecond } = char;
+export const Char = observer(({id, mapParams, updateLayerState}) => {
+  const char = charsObservable.dict[id].get();
+  const { pos, representation, moves, moveType, maxAge, history, shoots, shotsPerSecond } = char;
   const {x, y, dir, speed} = pos; 
   const [lastFireTime, setLastFireTime] = useState(0);
 
   useAnimationFrame(deltaTime => {
+    //console.log('boop')
     // Age
     if (true && maxAge && history) {
       if (!history.birthTime) history.birthTime = Date.now();
       if (Date.now() - history.birthTime > maxAge) {
-        // console.log(`removing ${representation} id ${id}`)
-        addChar({
-          ...charData,
-          remove: true
-        })
-        //removeChar(id)
-        //updateState(0);
-        //updateLayerState(0);
+        charsObservable.idArray.set(charsObservable.idArray.get().filter(thisId => thisId !== id));
         return;
       }
     }
@@ -62,7 +54,7 @@ export const Char = ({charData, mapParams, updateLayerState}) => {
       speed
     };
 
-    switch (charData.moveType) {
+    switch (moveType) {
       case MOVETYPES.RANDOM_WALK:
         newPosition = straightLineMove({
           x,
@@ -83,22 +75,14 @@ export const Char = ({charData, mapParams, updateLayerState}) => {
       default:
         break
     }
-    // console.log(`  -- calling mutateChar`)
-    // console.log(`  -- xdiff ${x-newPosition.x}`)
-    // console.log(`  -- ydiff ${y-newPosition.y}`)
-    addChar({
-      ...charData,
-      pos: newPosition
-    })
-    updateState(1);
-    
 
+    charsObservable.dict[id].pos.set(newPosition);
   })
 
   return (
     <div style={{zIndex: 'inherit', position: 'absolute', left: `${x}px`, top: `${y}px`, transform: `rotate(${dir+3.142*1.5}rad)`}}>{representation}</div>
   )
-};
+});
 
 Char.propTypes = {
   charData: PropTypes.object,
