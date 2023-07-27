@@ -1,30 +1,6 @@
-import { observable, observe } from "@legendapp/state"
+import { observable } from "@legendapp/state"
 import { makeBug, makeTower } from '../generators/units';
-import { create } from "lodash";
-
-export const useCharStoreOld = create((set) => ({
-    chars: [],
-    addChar: (char) => set((state) => ({ chars: state.chars.concat([char])})),
-    removeChar: (id) => set((state) => {
-        const matches = state.chars.filter(char => char.id === id);
-        if (!matches || !matches.length) ({ chars: state.chars });
-        const char = matches[0];
-        console.log(`removing ${char.representation} ${id}`)
-        return ({ chars: state.chars.filter(char => char.id !== id)})
-    }),
-    mutateChar: (passedChar) => set((state) => {
-        
-        const { id: passedId } = passedChar;
-        const matchingIndex = state.chars.findIndex(char => char.id === passedId);
-        //console.log(`mutate idx ${matchingIndex} -- char ${passedChar.representation} ${passedChar.id}`)
-        if (matchingIndex < 0) {
-            console.log(`  INDEX NOT FOUND!`)
-            return ({ chars: state.chars });
-        }
-        state.chars[matchingIndex] = passedChar;
-        return ({ chars: state.chars });
-    })
-}));
+import omit from "lodash/omit";
 
 const createInitialGameState = () => {
 
@@ -48,21 +24,17 @@ const createInitialGameState = () => {
         idArray: Object.keys(chars)
     };
 }
-export const useCharStore = create((set) => ({
-    chars: createInitialGameState(),
-    addChar: (char) => set((state) => {
-        state.chars[`${char.id}`] = char;
-        return state
-    }),
-    removeChar: (id) => set((state) => {
-        delete state.chars[`${id}`]
-        return state;
-    }),
-    removeDead: () => set((state) => {
-        return state;
-        // not finished!
-        const newChars = Object.entries(state.chars).filter(([key, char]) => !char.remove)
-    })
-}));
+
 
 export const charsObservable = observable(createInitialGameState());
+
+export const dropChar = (id) => {
+    charsObservable.idArray.set(charsObservable.idArray.get().filter(thisId => thisId !== id))
+    charsObservable.dict.set(omit(charsObservable.dict.get(), id));
+}
+
+export const addChar = (char) => {
+    charsObservable.idArray.set([...charsObservable.idArray.get(), char.id]);
+    const newDict = {...charsObservable.dict.get(), [char.id]: char};
+    charsObservable.dict.set(newDict);
+}

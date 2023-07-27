@@ -2,51 +2,64 @@ import React, { useState } from 'react';
 import { useAnimationFrame } from '@haensl/react-hooks';
 import PropTypes from 'prop-types';
 import { observer } from "@legendapp/state/react"
+import Victor from 'victor';
+import first from 'lodash/first';
 // import { useCharStore } from '../../../state/chars';
-import { charsObservable } from '../../../state/chars';
-import { MOVETYPES, makeBullet } from '../../../generators/units';
+import { charsObservable, dropChar, addChar } from '../../../state/chars';
+import { MOVETYPES, CHARTYPES, makeBullet } from '../../../generators/units';
 import { rndDirNudge, rndSpeedNudge, straightLineMove, rndDir } from '../../../helpers/physics';
+import { getNearestBug, actOnNearestBug } from '../../../helpers/interaction';
 
 export const Char = observer(({id, mapParams, updateLayerState}) => {
-  const char = charsObservable.dict[id].get();
-  const { pos, representation, moves, moveType, maxAge, history, shoots, shotsPerSecond } = char;
-  const {x, y, dir, speed} = pos; 
   const [lastFireTime, setLastFireTime] = useState(0);
 
+  const char = charsObservable.dict[id].get();
+  if (!char) // handle the situation when char is null (it's been deleted)
+    return (<div style={{display: 'none'}} />)
+
+  const { pos, representation, moves, moveType, maxAge, history, shoots, shotsPerSecond, type } = char;
+  const {x, y, dir, speed} = pos; 
+
+
+
   useAnimationFrame(deltaTime => {
-    //console.log('boop')
     // Age
     if (true && maxAge && history) {
       if (!history.birthTime) history.birthTime = Date.now();
       if (Date.now() - history.birthTime > maxAge) {
-        charsObservable.idArray.set(charsObservable.idArray.get().filter(thisId => thisId !== id));
+        dropChar(id);
         return;
       }
     }
 
-    if (false && shoots) {
+    if (true && shoots) {
       if (!lastFireTime || Date.now() - lastFireTime > (1 / shotsPerSecond * 1000)) {
-        console.log('boom')
-        addChar({
-          ...makeBullet(),
-          pos: {
-            x,
-            y,
-            dir: rndDir(),
-            speed: .2
-          }
+        actOnNearestBug(char, charsObservable.dict.get(), 10_000, (target) => {
+          addChar({
+            ...makeBullet(),
+            pos: {
+              x,
+              y,
+              dir: (new Victor(target.pos.x, target.pos.y)).subtract((new Victor(pos.x, pos.y))).angle() + Math.PI,
+              speed: .2
+            }
+          })
+          setLastFireTime(Date.now())
         })
-        setLastFireTime(Date.now())
       } 
     }
 
+    if (type === CHARTYPES.BULLET)
+      actOnNearestBug(char, charsObservable.dict.get(), 400, (target) => {
+        dropChar(target.id);
+        dropChar(char.id)
+      });
+
     // Movement
     if (!moves) {
-      // console.log(`  -- moves == FALSE, bailing out`)
       return;
     }
     
-    // console.log(`animate ${representation} ${id} ${charData.moveType}`)
     let newPosition = {
       x,
       y,

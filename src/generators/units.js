@@ -1,5 +1,12 @@
 import { rndPos } from "../helpers/physics";
 
+export const CHARTYPES = {
+    NONE: 0,
+    TOWER: 1,
+    BUG: 2,
+    BULLET: 3
+}
+
 export const MOVETYPES = {
     NONE: 0,
     STRAIGHT_LINE: 1,
@@ -13,15 +20,17 @@ export const makeChar = () => ({
     history: {
         remove: false
     },
-    moveType: MOVETYPES.NONE
+    moveType: MOVETYPES.NONE,
+    type: CHARTYPES.NONE
 });
   
 export const makeBug = () => ({
     ...makeChar(),
     representation: 'A',
     moves: true,
-    maxAge: 10_000 * Math.random(),
-    moveType: MOVETYPES.RANDOM_WALK
+    maxAge: 30_000 * Math.random(),
+    moveType: MOVETYPES.RANDOM_WALK,
+    type: CHARTYPES.BUG
 })
 
 export const makeBullet = () => ({
@@ -29,7 +38,8 @@ export const makeBullet = () => ({
     representation: '+',
     moves: true,
     maxAge: 1_000,
-    moveType: MOVETYPES.STRAIGHT_LINE
+    moveType: MOVETYPES.STRAIGHT_LINE,
+    type: CHARTYPES.BULLET
 })
 
 export const makeTower = () => ({
@@ -41,5 +51,6 @@ export const makeTower = () => ({
     },
     shoots: true,
     moves: false,
-    shotsPerSecond: 2
+    shotsPerSecond: 2,
+    type: CHARTYPES.TOWER
 });

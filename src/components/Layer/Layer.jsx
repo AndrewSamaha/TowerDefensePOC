@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Char } from './Char/Char';
 import { observer } from "@legendapp/state/react"
-import { charsObservable } from '../../state/chars';
+import { charsObservable, addChar } from '../../state/chars';
 // import { useCharStore } from '../../state/chars';
 import { makeBug } from '../../generators/units';
 import { useAnimationFrame } from '@haensl/react-hooks';
@@ -20,13 +20,13 @@ export const Layer = observer(({ zIndex=0, clickable, mapParams }) => {
     width: mapParams.width - layerPadding * 2,
     height: mapParams.height - layerPadding * 2
   }
-  // useEffect(() => {
-  //   if (Object.entries(chars).filter(([id, char]) => char.representation === 'A').length < 2) {
-  //     addChar(makeBug());
-  //   }
-  // }, [Object.keys(chars).length, addChar])
-  console.log('layer render')
-  console.log('chars=', {charIdArray})
+  useEffect(() => {
+    if (Object.entries(charsObservable.dict.get()).filter(([id, char]) => char.representation === 'A').length < 4) {
+      const A = makeBug();
+      addChar(A);
+    }
+  }, [charIdArray.length])
+  
   return (
     <div style={{
       position: 'absolute',
@@ -42,7 +42,7 @@ export const Layer = observer(({ zIndex=0, clickable, mapParams }) => {
       }}>
     {
         charIdArray.map((charId) => {
-          console.log(`creating char ${charId}`)
+          //console.log(`creating char ${charId}`)
           return (
           <Char
             key={`${charId}`}
