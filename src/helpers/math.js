@@ -1,8 +1,8 @@
 export const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 export const hardClamp = (num, max) => clamp(num, -max, max);
 export const softClamp = (num, max) => {
-    if (num > max) return num-max;
-    else if (num < -max) return num+max;
+    if (num > 0 && num > max) return num-max;
+    else if (num < 0 && num < -max) return num+max;
     return num;
 }
 

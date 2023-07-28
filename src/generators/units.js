@@ -1,10 +1,10 @@
 import { rndPos } from "../helpers/physics";
 
 export const CHARTYPES = {
-    NONE: 0,
-    TOWER: 1,
-    BUG: 2,
-    BULLET: 3
+    NONE: 'NONE',
+    TOWER: 'TOWER',
+    BUG: 'BUG',
+    BULLET: 'BULLET'
 }
 
 export const MOVETYPES = {
