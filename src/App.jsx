@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { XTerm } from 'xterm-for-react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import { Layer } from './components/Layer/Layer'

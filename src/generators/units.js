@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { rndPos } from "../helpers/physics";
 
 export const CHARTYPES = {
