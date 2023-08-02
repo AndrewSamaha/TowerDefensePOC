@@ -1,6 +1,5 @@
-//import { createObjectStore } from "./charsThree";
 import { expect, describe, it } from 'vitest';
-import { createObjectStore } from './charsThree.js';
+import { createObjectStore } from './chars.js';
 
 describe('createObjectStore', () => {
     const testStore = {

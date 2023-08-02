@@ -2,6 +2,7 @@ import { observer, useObservable, enableLegendStateReact } from "@legendapp/stat
 import React, { useState } from 'react';
 import { useAnimationFrame } from '@haensl/react-hooks';
 import omit from 'lodash/omit';
+import { charsObservable, dropChar, addChar } from '../../../state/chars';
 import { rndSpeed, rndDir, straightLineMove } from '../../../helpers/physics';
 import { softClamp } from '../../../helpers/math';
 
@@ -95,7 +96,11 @@ const Frag = observer(({ fragsObservable, id, mapParams }) => {
     </div>);
 })
 
-export const Explosion = ({ pos: initialPos, mapParams }) => {
+export const Explosion = ({ id: independentId, mapParams }) => {
+    console.log(independentId)
+    const independentChar = charsObservable.independent.dict[independentId].get();
+    console.log({independentChar})
+    const {initialPos} = independentChar;
     const fragsObservable = useObservable({
         a: makeFrag('a', initialPos),
         b: makeFrag('b', initialPos),

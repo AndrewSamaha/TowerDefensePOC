@@ -10,10 +10,10 @@ import { MOVETYPES, CHARTYPES, makeBullet } from '../../../generators/units';
 import { rndDirNudge, rndSpeedNudge, straightLineMove, rndDir } from '../../../helpers/physics';
 import { getNearestBug, actOnNearestBug } from '../../../helpers/interaction';
 
-export const Char = observer(({id, mapParams, updateLayerState}) => {
+export const Char = observer(({ id, mapParams, storeName }) => {
   const [lastFireTime, setLastFireTime] = useState(0);
 
-  const char = charsObservable.dict[id].get();
+  const char = charsObservable.interactive.dict[id].get();
   if (!char) // handle the situation when char is null (it's been deleted)
     return (<div style={{display: 'none'}} />)
 
@@ -27,15 +27,15 @@ export const Char = observer(({id, mapParams, updateLayerState}) => {
     if (true && maxAge && history) {
       if (!history.birthTime) history.birthTime = Date.now();
       if (Date.now() - history.birthTime > maxAge) {
-        dropChar(id);
+        dropChar(storeName, id);
         return;
       }
     }
 
     if (true && shoots) {
       if (!lastFireTime || Date.now() - lastFireTime > (1 / shotsPerSecond * 1000)) {
-        actOnNearestBug(char, charsObservable.dict.get(), 10_000, (target) => {
-          addChar({
+        actOnNearestBug(char, charsObservable.interactive.dict.get(), 10_000, (target) => {
+          addChar(storeName, {
             ...makeBullet(),
             pos: {
               x,
@@ -50,9 +50,9 @@ export const Char = observer(({id, mapParams, updateLayerState}) => {
     }
 
     if (type === CHARTYPES.BULLET)
-      actOnNearestBug(char, charsObservable.dict.get(), 400, (target) => {
-        dropChar(target.id);
-        dropChar(char.id)
+      actOnNearestBug(char, charsObservable.interactive.dict.get(), 400, (target) => {
+        dropChar(storeName, target.id);
+        dropChar(storeName, char.id)
       });
 
     // Movement
@@ -89,7 +89,7 @@ export const Char = observer(({id, mapParams, updateLayerState}) => {
         break
     }
 
-    charsObservable.dict[id].pos.set(newPosition);
+    charsObservable.interactive.dict[id].pos.set(newPosition);
   })
 
   return (

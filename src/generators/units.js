@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 import { rndPos } from "../helpers/physics";
 
 export const CHARTYPES = {
@@ -15,7 +15,7 @@ export const MOVETYPES = {
 }
 
 export const makeChar = () => ({
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     pos: rndPos(),
     moves: false,
     history: {

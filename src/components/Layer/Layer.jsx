@@ -9,7 +9,12 @@ import { Explosion } from './Explosion/Explosion';
 const layerPadding = 10;
 
 export const Layer = observer(({ zIndex=0, clickable, mapParams }) => {
-  const charIdArray = charsObservable.idArray.get();
+  //console.log('layer render', Date.now())
+  const interactiveIdArray = charsObservable.interactive.idArray.get();
+  // const interactiveDict = charsObservable.interactive.dict.get();
+  const independentIdArray = charsObservable.independent.idArray.get();
+  // const independentDict = charsObservable.independent.dict.get();
+
   if (clickable) 1;
 
   const charMapParams = {
@@ -17,11 +22,11 @@ export const Layer = observer(({ zIndex=0, clickable, mapParams }) => {
     height: mapParams.height - layerPadding * 2
   }
   useEffect(() => {
-    if (Object.entries(charsObservable.dict.get()).filter(([id, char]) => char.representation === 'A').length < 4) {
+    if (Object.entries(charsObservable.interactive.dict.get()).filter(([id, char]) => char.representation === 'A').length < 4) {
       const A = makeBug();
-      addChar(A);
+      addChar('interactive', A);
     }
-  }, [charIdArray.length])
+  }, [interactiveIdArray.length])
   
   return (
     <div style={{
@@ -36,26 +41,34 @@ export const Layer = observer(({ zIndex=0, clickable, mapParams }) => {
       padding: `${layerPadding}px`,
       margin: '0'
       }}>
-        <Explosion pos={{
+        {/* <Explosion pos={{
             x: 100,
             y: 100,
             dir: 0,
             speed: 100
           }}
           mapParams={mapParams}
-          />
+          /> */}
+          {
+            independentIdArray.map((id) => {
+              <Explosion
+                key={`independent${id}`}
+                mapParams={mapParams}
+              />
+            })
+          }
           
-    {
-        charIdArray.map((charId) => {
-          return (
-          <Char
-            key={`${charId}`}
-            id={charId}
-            mapParams={charMapParams}
-            
-          />
-        )})
-    }
+          {
+              interactiveIdArray.map((charId) => {
+                return (
+                <Char
+                  key={`${charId}`}
+                  id={charId}
+                  mapParams={charMapParams}
+                  storeName={'interactive'}
+                />
+              )})
+          }
     </div>
   )
 });
