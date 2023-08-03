@@ -10,6 +10,9 @@ const layerPadding = 10;
 
 export const Layer = observer(({ zIndex=0, clickable, mapParams }) => {
   //console.log('layer render', Date.now())
+  const interactive = charsObservable.interactive.idArray.use();
+  const independent = charsObservable.independent.idArray.use();
+
   const interactiveIdArray = charsObservable.interactive.idArray.get();
   // const interactiveDict = charsObservable.interactive.dict.get();
   const independentIdArray = charsObservable.independent.idArray.get();
@@ -51,10 +54,14 @@ export const Layer = observer(({ zIndex=0, clickable, mapParams }) => {
           /> */}
           {
             independentIdArray.map((id) => {
-              <Explosion
-                key={`independent${id}`}
-                mapParams={mapParams}
-              />
+              
+              return (
+                <Explosion
+                  key={`independent${id}`}
+                  id={id}
+                  mapParams={mapParams}
+                />
+              )
             })
           }
           

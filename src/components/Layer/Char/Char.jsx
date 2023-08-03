@@ -6,7 +6,7 @@ import Victor from 'victor';
 import first from 'lodash/first';
 // import { useCharStore } from '../../../state/chars';
 import { charsObservable, dropChar, addChar } from '../../../state/chars';
-import { MOVETYPES, CHARTYPES, makeBullet } from '../../../generators/units';
+import { MOVETYPES, CHARTYPES, makeBullet, makeChar } from '../../../generators/units';
 import { rndDirNudge, rndSpeedNudge, straightLineMove, rndDir } from '../../../helpers/physics';
 import { getNearestBug, actOnNearestBug } from '../../../helpers/interaction';
 
@@ -51,8 +51,13 @@ export const Char = observer(({ id, mapParams, storeName }) => {
 
     if (type === CHARTYPES.BULLET)
       actOnNearestBug(char, charsObservable.interactive.dict.get(), 400, (target) => {
+        addChar('independent', {
+          ...makeChar(),
+          pos: target.pos
+        });
         dropChar(storeName, target.id);
         dropChar(storeName, char.id)
+        
       });
 
     // Movement

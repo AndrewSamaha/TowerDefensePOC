@@ -97,10 +97,14 @@ const Frag = observer(({ fragsObservable, id, mapParams }) => {
 })
 
 export const Explosion = ({ id: independentId, mapParams }) => {
-    console.log(independentId)
+    if (!independentId) {
+        console.log('attempting to render with null id, bailing');
+        return null;
+    }
+
     const independentChar = charsObservable.independent.dict[independentId].get();
-    console.log({independentChar})
-    const {initialPos} = independentChar;
+    const {pos: initialPos} = independentChar;
+    
     const fragsObservable = useObservable({
         a: makeFrag('a', initialPos),
         b: makeFrag('b', initialPos),
