@@ -2,6 +2,7 @@ import { observer, useObservable, enableLegendStateReact } from "@legendapp/stat
 import React, { useState } from 'react';
 import { useAnimationFrame } from '@haensl/react-hooks';
 import omit from 'lodash/omit';
+import useInterval from 'react-useinterval';
 import { charsObservable, dropChar, addChar } from '../../../state/chars';
 import { rndSpeed, rndDir, straightLineMove } from '../../../helpers/physics';
 import { softClamp } from '../../../helpers/math';
@@ -97,14 +98,10 @@ const Frag = observer(({ fragsObservable, id, mapParams }) => {
 })
 
 export const Explosion = ({ id: independentId, mapParams }) => {
-    if (!independentId) {
-        console.log('attempting to render with null id, bailing');
-        return null;
-    }
-
-    const independentChar = charsObservable.independent.dict[independentId].get();
-    const {pos: initialPos} = independentChar;
     
+    const independentChar = independentId ? charsObservable.independent.dict[independentId].get() : {};
+    const {pos: initialPos} = independentChar;
+
     const fragsObservable = useObservable({
         a: makeFrag('a', initialPos),
         b: makeFrag('b', initialPos),
@@ -116,6 +113,17 @@ export const Explosion = ({ id: independentId, mapParams }) => {
         h: makeFrag('h', initialPos),
         i: makeFrag('i', initialPos),
     });
+
+    useInterval(() => {
+        if (Object.keys(fragsObservable.get()).length <= 0) {
+            dropChar('independent', independentId)
+        }
+    }, 1033)
+
+    if (!independentId) {
+        console.log('attempting to render with null id, bailing');
+        return null;
+    }
 
     return (
         <div>
