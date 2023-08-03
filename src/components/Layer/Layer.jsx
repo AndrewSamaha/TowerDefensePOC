@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import useInterval from 'react-useinterval';
 import PropTypes from 'prop-types';
 import { Char } from './Char/Char';
 import { observer } from "@legendapp/state/react"
@@ -22,6 +23,10 @@ export const Layer = observer(({ zIndex=0, clickable, mapParams }) => {
       addChar('interactive', A);
     }
   }, [interactiveIdArray.length])
+
+  useInterval(() => {
+    console.log(`array sizes ${charsObservable.independent.idArray.get().length}`)
+  }, 1181)
   
   return (
     <div
@@ -30,8 +35,8 @@ export const Layer = observer(({ zIndex=0, clickable, mapParams }) => {
         addChar('interactive', {
           ...makeTower(),
           pos: {
-            x: e.nativeEvent.layerX, // e.clientX,
-            y: e.nativeEvent.layerY, // e.clientY,
+            x: e.nativeEvent.layerX,
+            y: e.nativeEvent.layerY,
             dir: Math.PI/2,
             speed: 0
           }
