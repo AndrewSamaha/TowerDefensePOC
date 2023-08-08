@@ -6,6 +6,7 @@ import useInterval from 'react-useinterval';
 import { charsObservable, dropChar, addChar } from '../../../state/chars';
 import { rndSpeed, rndDir, straightLineMove } from '../../../helpers/physics';
 import { softClamp } from '../../../helpers/math';
+import { worldXtoScreenX, worldYtoScreenY } from "../../../helpers/viewport";
 
 enableLegendStateReact()
 
@@ -32,7 +33,8 @@ const makeFrag = (id, {x, y}) => ({
 const dropFrag = (observable, id) => observable.set(omit(observable[id].get(), id));
 
 
-const Frag = observer(({ fragsObservable, id, mapParams }) => {
+const Frag = observer(({ fragsObservable, id, mapParams, viewport }) => {
+    const viewportPos = viewport.pos.use();
 
     useAnimationFrame(deltaTime => {
         if (!fragsObservable[id].get()) return;
@@ -90,15 +92,16 @@ const Frag = observer(({ fragsObservable, id, mapParams }) => {
         style={{
             zIndex: 'inherit',
             position: 'absolute',
-            left: `${fragsObservable[id].get().pos?.x}px`, top: `${fragsObservable[id].get().pos?.y}px`,
-            transform: `rotate(${fragsObservable[id].get().pos?.spin+3.142*1.5}rad)`,
+            left: `${worldXtoScreenX(fragsObservable[id].peek().pos?.x, viewport.pos.x.peek())}px`,
+            top: `${worldYtoScreenY(fragsObservable[id].peek().pos?.y, viewport.pos.y.peek())}px`,
+            transform: `rotate(${fragsObservable[id].peek().pos?.spin+3.142*1.5}rad)`,
             fontSize: '.7em'}}>
             {fragsObservable[id].representation}
     </div>);
 })
 
-export const Explosion = ({ id: independentId, mapParams }) => {
-    
+export const Explosion = ({ id: independentId, mapParams, viewport }) => {
+    const viewportPos = viewport.pos.use();
     const independentChar = independentId ? charsObservable.independent.dict[independentId].get() : {};
     const {pos: initialPos} = independentChar;
 
@@ -128,12 +131,13 @@ export const Explosion = ({ id: independentId, mapParams }) => {
     return (
         <div>
             {
-                Object.entries(fragsObservable.get()).map(([key, frag]) => (
+                Object.entries(fragsObservable.peek()).map(([key, frag]) => (
                     <Frag
                         key={`frag-${key}`}
                         id={key} 
                         fragsObservable={fragsObservable}
                         mapParams={mapParams}
+                        viewport={viewport}
                     />))
             }
         </div>

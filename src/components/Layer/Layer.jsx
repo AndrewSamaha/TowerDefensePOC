@@ -2,41 +2,45 @@ import React, { useEffect } from 'react';
 import useInterval from 'react-useinterval';
 import PropTypes from 'prop-types';
 import { Char } from './Char/Char';
+import { observable } from '@legendapp/state';
 import { observer } from "@legendapp/state/react"
 import { charsObservable, addChar } from '../../state/chars';
 import { makeBug, makeTower } from '../../generators/units';
 import { Explosion } from './Explosion/Explosion';
+import { screenXtoWorldX, screenYtoWorldY } from '../../helpers/viewport';
 
 const layerPadding = 10;
 
-export const Layer = observer(({ zIndex=0, clickable, mapParams }) => {
+export const Layer = observer(({ viewport, zIndex=0, clickable, mapParams }) => {
   const interactiveIdArray = charsObservable.interactive.idArray.get();
   const independentIdArray = charsObservable.independent.idArray.get();
-
+  //const viewportPos = viewport.pos.use();
+  
   const charMapParams = {
     width: mapParams.width - layerPadding * 2,
     height: mapParams.height - layerPadding * 2
   }
   useEffect(() => {
-    if (Object.entries(charsObservable.interactive.dict.get()).filter(([id, char]) => char.representation === 'A').length < 4) {
+    if (Object.entries(charsObservable.interactive.dict.peek()).filter(([id, char]) => char.representation === 'A').length < 1) {
       const A = makeBug();
       addChar('interactive', A);
     }
   }, [interactiveIdArray.length])
 
-  useInterval(() => {
-    console.log(`array sizes ${charsObservable.independent.idArray.get().length}`)
-  }, 1181)
+  // useInterval(() => {
+  //   // console.log(`array sizes ${charsObservable.independent.idArray.get().length}`)
+  //   console.log(`[${viewportPos.x}, ${viewportPos.y}]`)
+  // }, 1181)
   
   return (
     <div
       onMouseDown={(e) => {
-        console.log(e.nativeEvent)
+        //console.log(e.nativeEvent)
         addChar('interactive', {
           ...makeTower(),
           pos: {
-            x: e.nativeEvent.layerX,
-            y: e.nativeEvent.layerY,
+            x: screenXtoWorldX(e.nativeEvent.layerX, viewport.pos.x.peek()),
+            y: screenYtoWorldY(e.nativeEvent.layerY, viewport.pos.y.peek()),
             dir: Math.PI/2,
             speed: 0
           }
@@ -62,6 +66,7 @@ export const Layer = observer(({ zIndex=0, clickable, mapParams }) => {
                   key={`independent${id}`}
                   id={id}
                   mapParams={mapParams}
+                  viewport={viewport}
                 />
               )
             })
@@ -75,6 +80,7 @@ export const Layer = observer(({ zIndex=0, clickable, mapParams }) => {
                   id={charId}
                   mapParams={charMapParams}
                   storeName={'interactive'}
+                  viewport={viewport}
                 />
               )})
           }

@@ -9,9 +9,12 @@ import { charsObservable, dropChar, addChar } from '../../../state/chars';
 import { MOVETYPES, CHARTYPES, makeBullet, makeChar } from '../../../generators/units';
 import { rndDirNudge, rndSpeedNudge, straightLineMove, rndDir } from '../../../helpers/physics';
 import { getNearestBug, actOnNearestBug } from '../../../helpers/interaction';
+import { GAME_SIZE } from '../../../constants/game';
+import { worldXtoScreenX, worldYtoScreenY } from '../../../helpers/viewport';
 
-export const Char = observer(({ id, mapParams, storeName }) => {
+export const Char = observer(({ id, mapParams, storeName, viewport }) => {
   const [lastFireTime, setLastFireTime] = useState(0);
+  //const viewportPos = viewport.pos.use();
 
   const char = charsObservable.interactive.dict[id].get();
   if (!char) // handle the situation when char is null (it's been deleted)
@@ -23,6 +26,9 @@ export const Char = observer(({ id, mapParams, storeName }) => {
 
 
   useAnimationFrame(deltaTime => {
+    if (Math.abs(viewport.force.x.peek()) > .90) {
+      console.log(Date.now(), 'Char animating', viewport.force.x.peek())
+    }
     // Age
     if (true && maxAge && history) {
       if (!history.birthTime) history.birthTime = Date.now();
@@ -98,7 +104,15 @@ export const Char = observer(({ id, mapParams, storeName }) => {
   })
 
   return (
-    <div style={{zIndex: 'inherit', position: 'absolute', left: `${x}px`, top: `${y}px`, transform: `rotate(${dir+3.142*1.5}rad)`}}>{representation}</div>
+    <div 
+      style={{
+        zIndex: 'inherit',
+        position: 'absolute',
+        left: `${worldXtoScreenX(x, viewport.pos.x.peek())}px`,
+        top: `${worldYtoScreenY(y, viewport.pos.y.peek())}px`,
+        transform: `rotate(${dir+3.142*1.5}rad)`}}>
+          {representation}
+    </div>
   )
 });
 

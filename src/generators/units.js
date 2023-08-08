@@ -36,7 +36,7 @@ export const makeBug = () => ({
 
 export const makeBullet = () => ({
     ...makeChar(),
-    representation: '+',
+    representation: '^',
     moves: true,
     maxAge: 1_000,
     moveType: MOVETYPES.STRAIGHT_LINE,
