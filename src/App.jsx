@@ -15,6 +15,8 @@ import { VIEWPORT_KEYS } from './constants/input';
 import { hardClamp } from './helpers/math';
 import { useAnimationFrame } from '@haensl/react-hooks';
 
+import { createInitialViewportState } from './state/viewport';
+
 const layer = {
   zIndex: 0,
   clickable: false
