@@ -22,7 +22,7 @@ export const createObjectStore = (object, entityArray, storeName = 'UnnamedStore
     };
 }
 
-const createInitialGameState = () => {
+export const createInitialGameState = () => {
 
     console.log('creating initial game state')
     const initialState = {

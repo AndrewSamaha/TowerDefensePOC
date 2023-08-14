@@ -16,6 +16,7 @@ import { hardClamp } from './helpers/math';
 import { useAnimationFrame } from '@haensl/react-hooks';
 
 import { createInitialViewportState } from './state/viewport';
+import { createInitialGameState } from './state/chars';
 
 const layer = {
   zIndex: 0,
@@ -78,12 +79,9 @@ function App() {
         globalStore.viewport.pos.x.set(position.x);
         globalStore.viewport.pos.y.set(position.y);
       }
-    }
+    },
+    ...createInitialGameState()
   })
-  // useInterval(() => {
-  //   // console.log(`array sizes ${charsObservable.independent.idArray.get().length}`)
-  //   //console.log(globalStore.viewport.force.peek(), globalStore.viewport.pos.x.peek())
-  // }, 1181)
 
   useAnimationFrame((delta) => {
     // apply friction to speed
