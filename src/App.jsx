@@ -80,7 +80,7 @@ function App() {
         globalStore.viewport.pos.y.set(position.y);
       }
     },
-    ...createInitialGameState()
+    ...createInitialGameState()  // TODO: Refactor to gameState: createInitialGameState()
   })
 
   useAnimationFrame((delta) => {
