@@ -8,25 +8,31 @@ import { charsObservable, addChar } from '../../state/chars';
 import { makeBug, makeTower } from '../../generators/units';
 import { Explosion } from './Explosion/Explosion';
 import { screenXtoWorldX, screenYtoWorldY } from '../../helpers/viewport';
+import { globalStore } from '../../state/globalStore';
 
 const layerPadding = 10;
 
-export const Layer = observer(({ viewport, zIndex=0, clickable, mapParams }) => {
-  const interactiveIdArray = charsObservable.interactive.idArray.get();
-  const independentIdArray = charsObservable.independent.idArray.get();
-  //const viewportPos = viewport.pos.use();
+// export const Layer = observer(({ viewport, zIndex=0, clickable, mapParams }) => {
+export const Layer = observer(({ zIndex=0, mapParams }) => {
+  globalStore.viewport.use();
+  const viewport = globalStore.viewport;
+  // const interactiveIdArray = charsObservable.interactive.idArray.get();
+  // const independentIdArray = charsObservable.independent.idArray.get();
+  const interactiveIdArray = globalStore.interactive.idArray.get();
+  const independentIdArray = globalStore.independent.idArray.get();
+  
   
   const charMapParams = {
     width: mapParams.width - layerPadding * 2,
     height: mapParams.height - layerPadding * 2
   }
   useEffect(() => {
-    if (Object.entries(charsObservable.interactive.dict.peek()).filter(([id, char]) => char.representation === 'A').length < 1) {
+    if (Object.entries(globalStore.interactive.dict.peek()).filter(([id, char]) => char.representation === 'A').length < 1) {
       const A = makeBug();
       addChar('interactive', A);
     }
   }, [interactiveIdArray.length])
-
+  //console.log('Layer render', Date.now())
   // useInterval(() => {
   //   // console.log(`array sizes ${charsObservable.independent.idArray.get().length}`)
   //   console.log(`[${viewportPos.x}, ${viewportPos.y}]`)
