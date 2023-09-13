@@ -1,70 +1,119 @@
 import { observer, useObservable, enableLegendStateReact } from "@legendapp/state/react";
+import { observable } from "@legendapp/state"
 import React, { useState } from 'react';
 import { useAnimationFrame } from '@haensl/react-hooks';
+import { v4 as uuid } from 'uuid';
 import omit from 'lodash/omit';
+import compact from 'lodash/compact';
 import useInterval from 'react-useinterval';
+import { makeChar, makeFrag } from "../../../generators/units";
 import { charsObservable, dropChar, addChar } from '../../../state/chars';
 import { rndSpeed, rndDir, straightLineMove } from '../../../helpers/physics';
 import { softClamp } from '../../../helpers/math';
 import { worldXtoScreenX, worldYtoScreenY } from "../../../helpers/viewport";
+import { globalStore } from "../../../state/globalStore";
 
-enableLegendStateReact()
+// enableLegendStateReact()
 
-const letters = 'aloisu.,:123oknndi';
+// const letters = 'aloisu.,:123oknndi';
 
-const makeFrag = (id, {x, y}) => ({
-    id,
-    representation: letters[Math.floor(letters.length*Math.random())],
-    pos: {
-        x,
-        y,
-        dir: rndDir(),
-        speed: rndSpeed(),
-        spin: rndDir()
-    },
-    maxAge: 200 * Math.random() + 1_000 * Math.random() + 3_000 * Math.random(),
-    type: 'FRAG',
-    history: {
-        remove: false
-    },
-    boop: false
-});
+// const makeFrag = ({ x, y }) => {
+//     const id = uuid()
+//     return {
+//         id,
+//         uuid: id,
+//         representation: letters[Math.floor(letters.length * Math.random())],
+//         pos: {
+//             x,
+//             y,
+//             dir: rndDir(),
+//             speed: rndSpeed(),
+//             spin: rndDir()
+//         },
+//         maxAge: 200 * Math.random() + 1_000 * Math.random() + 3_000 * Math.random(),
+//         type: 'FRAG',
+//         history: {
+//             remove: false
+//         },
+//         boop: false
+//     }
+// };
 
-const dropFrag = (observable, id) => observable.set(omit(observable[id].get(), id));
+const dropFrag = (obs, id) => {
+    //console.log(`dropFrag id=[${id}] ${JSON.stringify(obs[id].peek())}`)
+    //console.log(`post omit=[${JSON.stringify(omit(obs.peek(), id))}]`)
+    const numKeys = Object.keys(obs.peek()).length;
+    const omitted = obs[id].peek();
+    obs.set(omit(obs.peek(), id))
+    const newNumKeys = Object.keys(obs.peek).length;
+    console.log(`drop fragged successful, ${numKeys} -> ${newNumKeys}, uuid=${omitted.uuid}`)
+};
 
 
-const Frag = observer(({ fragsObservable, id, mapParams, viewport }) => {
-    const viewportPos = viewport.pos.use();
+const Frag = observer(({ explosionId, fragId, mapParams }) => {
+    const viewport = globalStore.viewport;
+    const explosion = globalStore.independent.dict[explosionId].peek();
+    //console.log(`explosionId: ${explosionId}`)
+    //console.log(`rendering frag ${fragId}`)
+    //console.log(JSON.stringify(explosion))
+    const frag = explosion.frags[fragId];
+    //console.log(JSON.stringify(frag))
+    //console.log(JSON.stringify(globalStore.independent.idArray.peek()))
+    //debugger
+    // const frag = explosion.frags[fragId];
+    //const viewportPos = viewport.pos.use();
+    //fragsObservable[id].use();
+
+    //debugger;
+    const dropThisFrag = () => {
+        globalStore.independent.idArray[explosionId].frags.set(
+            omit(
+                globalStore.independent.idArray[explosionId].frags.peek(),
+                fragId
+            )
+        )
+    };
+
+    const updateFrag = (newFrag) => {
+        globalStore.independent.idArray[explosionId].frags[newFrag.id].set(
+            newFrag
+        )
+    };
 
     useAnimationFrame(deltaTime => {
-        if (!fragsObservable[id].get()) return;
-        
-        const frag = fragsObservable[id].get();
+        // if (!fragsObservable[id].get()) {
+        //     console.log(`bailing out of useAnimationFrame for frag ${id}`);
+        //     return;}
+
+        //const frag = fragsObservable[id].peek();
 
         if (!frag) {
-            console.log('useAnimationFrame on non-existant frag id=', id)
-            return;
-        }
-            
-        if (id === 'id' || id === '0') {
-            dropFrag(fragsObservable, id);
+            console.log('useAnimationFrame on non-existant frag id=', fragId)
             return;
         }
 
         if (!frag.pos) {
-            console.log(`frag but no pos: ${id} - ${frag}`)
-            dropFrag(fragsObservable, id);
+            console.log(`frag but no pos: ${fragId} - ${frag}`)
+            // globalStore.independent.idArray[explosionId].frags.set(
+            //     omit(
+            //         globalStore.independent.idArray[explosionId].frags.peek(),
+            //         fragId
+            //     )
+            // )
+            dropThisFrag();
+            //dropFrag(fragsObservable, id);
             return;
         }
-    
-        const {maxAge, history} = frag;
-        const {x, y, dir, speed, spin} = frag.pos;
+
+        const { maxAge, history } = frag;
+        const { x, y, dir, speed, spin } = frag.pos;
 
         if (true && maxAge && history) {
             if (!history.birthTime) history.birthTime = Date.now();
             if (Date.now() - history.birthTime > maxAge) {
                 history.remove = true;
-                dropFrag(fragsObservable, id);
+                console.log(`removing frag ${fragId} and ${Date.now()}`)
+                dropThisFrag();
             }
         }
         const newPosition = straightLineMove({
@@ -84,62 +133,89 @@ const Frag = observer(({ fragsObservable, id, mapParams, viewport }) => {
             boop: true
         };
 
-        fragsObservable[id].set(newFrag)
+        updateFrag(newFrag)
     });
-    
-    if (!fragsObservable[id].get()) return (<></>);
-    return (<div data={fragsObservable[id].get().type}
-        style={{
-            zIndex: 'inherit',
-            position: 'absolute',
-            left: `${worldXtoScreenX(fragsObservable[id].peek().pos?.x, viewport.pos.x.peek())}px`,
-            top: `${worldYtoScreenY(fragsObservable[id].peek().pos?.y, viewport.pos.y.peek())}px`,
-            transform: `rotate(${fragsObservable[id].peek().pos?.spin+3.142*1.5}rad)`,
-            fontSize: '.7em'}}>
-            {fragsObservable[id].representation}
-    </div>);
+
+    //if (!fragsObservable[id].peek()) return (<div></div>);
+    return (
+        <div data={frag.type}
+            style={{
+                zIndex: 'inherit',
+                position: 'absolute',
+                left: `${worldXtoScreenX(frag.pos?.x, viewport.pos.x.peek())}px`,
+                top: `${worldYtoScreenY(frag.pos?.y, viewport.pos.y.peek())}px`,
+                transform: `rotate(${frag.pos?.spin + 3.142 * 1.5}rad)`,
+                fontSize: '.7em'
+            }}>
+            {frag.representation}
+        </div>
+    );
 })
 
-export const Explosion = ({ id: independentId, mapParams, viewport }) => {
-    const viewportPos = viewport.pos.use();
-    const independentChar = independentId ? charsObservable.independent.dict[independentId].get() : {};
-    const {pos: initialPos} = independentChar;
+export const createExplosion = ({ pos }, store) => {
+    // const explosion = {
+    //     ...makeChar(),
+    //     pos,
+    //     frags: {
+    //         a: makeFrag('a', pos),    
+    //     },
+    //     test: 'wawa'
+    // };
+    //addChar('independent', explosion, store);
 
-    const fragsObservable = useObservable({
-        a: makeFrag('a', initialPos),
-        b: makeFrag('b', initialPos),
-        c: makeFrag('c', initialPos),
-        d: makeFrag('d', initialPos),
-        e: makeFrag('e', initialPos),
-        f: makeFrag('f', initialPos),
-        g: makeFrag('g', initialPos),
-        h: makeFrag('h', initialPos),
-        i: makeFrag('i', initialPos),
-    });
+    addChar('independent', makeFrag(pos), store);
+    // addChar('independent', makeFrag(pos), store);
+    // addChar('independent', makeFrag(pos), store);
+    return { id: 'justFrags' };
+}
+
+export const Explosion = observer(({ id: independentId, mapParams }) => {
+    // const viewportPos = viewport.pos.use();
+    // const independentChar = independentId ? charsObservable.independent.dict[independentId].get() : {};
+    console.log(`rendering explosion ${independentId}`)
+    const independentChar = independentId ? globalStore.independent.dict[independentId].peek() : {};
+    const { pos: initialPos, frags, test } = independentChar;
 
     useInterval(() => {
-        if (Object.keys(fragsObservable.get()).length <= 0) {
-            dropChar('independent', independentId)
+        //console.log('frag a')
+        //fragsObservable.use();
+        const independentChar = independentId ? globalStore.independent.dict[independentId].peek() : {};
+        const { pos: initialPos, frags } = independentChar;
+        if (!frags) return;
+        if (frags && Object.keys(frags).length <= 0) {
+            console.log(`dropping explosion ${independentId}`)
+            dropChar('independent', independentId, globalStore)
         }
+        //console.log('frag b')
     }, 1033)
 
     if (!independentId) {
         console.log('attempting to render with null id, bailing');
         return null;
     }
-
+    if (!frags) {
+        console.log(' explosion has no frags', test)
+        return (<></>);
+    }
+    if (!Object.keys(frags).length) {
+        // console.log('frag is empty', JSON.stringify(independentChar))
+        // console.log('frags')
+        // console.log(JSON.stringify(frags))
+        return (<></>);
+    }
+    //fragsObservable.use();
     return (
         <div>
             {
-                Object.entries(fragsObservable.peek()).map(([key, frag]) => (
+                compact(Object.entries(frags).map(([key, frag]) => (
                     <Frag
                         key={`frag-${key}`}
-                        id={key} 
-                        fragsObservable={fragsObservable}
+                        id={key}
+                        explosionId={independentId}
+                        fragId={frag.id}
                         mapParams={mapParams}
-                        viewport={viewport}
-                    />))
+                    />)))
             }
         </div>
     );
-};
+});

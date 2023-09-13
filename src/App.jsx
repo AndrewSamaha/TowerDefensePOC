@@ -18,7 +18,8 @@ import { useAnimationFrame } from '@haensl/react-hooks';
 import { createInitialViewportState } from './state/viewport';
 import { createInitialGameState } from './state/chars';
 import { globalStore } from './state/globalStore';
-import { animate } from './components/Layer/Char/Char';
+//import { animate } from './components/Layer/Char/Char';
+import { animate } from './animators/char';
 
 const layer = {
   zIndex: 0,
@@ -39,6 +40,7 @@ const PX_PER_MS = .250;
 function App() {
   
   useAnimationFrame((delta) => {
+    
     //if (Math.random() > .94) console.log(`useAnimationFrame ${globalStore.interactive.idArray.peek().length} ${Date.now()}`);
     // Animate Viewport
     (() => {
@@ -54,17 +56,22 @@ function App() {
       globalStore.viewport.moveViewport(delta);
     })();
 
-    // Animate Chars (units)
-    globalStore.interactive.idArray.peek().map((id) => {
-      //console.log(' calling char.animate')
-      animate(delta, globalStore.viewport, globalStore, 'interactive', mapParams, id)
-      // (deltaTime, viewport, store, storeName, mapParams, id) => {
-    });
-    globalStore.independent.idArray.peek().map((id) => {
-      //console.log(' calling char.animate')
-      animate(delta, globalStore.viewport, globalStore, 'independent', mapParams, id)
-      // (deltaTime, viewport, store, storeName, mapParams, id) => {
-    });
+    Object.entries(globalStore.interactive.dict.peek()).map(([id, char]) => {
+      const { animate } = char;
+      if (animate) animate(delta, globalStore.viewport, globalStore, 'interactive', mapParams, id)
+    })
+
+    Object.entries(globalStore.independent.dict.peek()).map(([id, char]) => {
+      const { animate } = char;
+      if (animate) animate(delta, globalStore.viewport, globalStore, 'independent', mapParams, id)
+    })
+
+    // //console.log(`mainAnimationLoop ${Date.now()}`)
+    // globalStore.independent.idArray.peek().map((id) => {
+    //   //console.log(' calling char.animate')
+    //   animate(delta, globalStore.viewport, globalStore, 'independent', mapParams, id)
+    //   // (deltaTime, viewport, store, storeName, mapParams, id) => {
+    // });
   })
 
   return (

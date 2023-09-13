@@ -54,7 +54,8 @@ export const createInitialGameState = () => {
 
 export const charsObservable = observable(createInitialGameState());
 
-export const dropChar = (storeName, id, thisObservable=charsObservable) => {
+export const dropChar = (storeName, id, thisObservable=null) => {
+    if (!thisObservable) throw(`no observable passed to dropChar`)
     if (!(typeof storeName === 'string' || storeName instanceof String)) throw(`something not a string was passed to drop.storeName ${storeName}`)
     thisObservable[storeName].idArray.set(
         compact(thisObservable[storeName].idArray.get()).filter(thisId => thisId !== id)
@@ -64,11 +65,13 @@ export const dropChar = (storeName, id, thisObservable=charsObservable) => {
     );
 }
 
-export const addChar = (storeName, char, thisObservable=charsObservable) => {
+export const addChar = (storeName, char, thisObservable=null) => {
+    if (!thisObservable) throw(`no observable passed to addChar`)
     if (!(typeof storeName === 'string' || storeName instanceof String)) throw(`something not a string was passed to addChar.storeName ${storeName}`)
     if (!char || !char.id) return;
     const idArray = thisObservable[storeName].idArray?.get() || [];
     thisObservable[storeName].idArray.set([...idArray, char.id]);
     const newDict = {...thisObservable[storeName].dict.get(), [char.id]: char};
     thisObservable[storeName].dict.set(newDict);
+    return char;
 }
