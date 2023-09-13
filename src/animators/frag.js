@@ -75,14 +75,7 @@ export const animate = (deltaTime, viewport, store, storeName, mapParams, fragId
         if (!history.birthTime) history.birthTime = Date.now();
         if (Date.now() - history.birthTime > maxAge) {
             history.remove = true;
-            console.log(`removing frag ${fragId} and ${Date.now()}`)
-            console.log(`maxAge=${maxAge}`)
-            console.log(`Date.now() - history.birthTime=${(Date.now() - history.birthTime)}`)
-            console.log(`Date.now() - history.birthTime > maxAge = ${(Date.now() - history.birthTime > maxAge)}`)
             dropThisFrag(fragId);
-            console.log(globalStore.independent.idArray.peek());
-            console.log(globalStore.independent.dict.peek());
-            //debugger;
             return;
         }
     }

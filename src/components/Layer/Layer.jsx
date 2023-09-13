@@ -30,7 +30,7 @@ export const Layer = observer(({ zIndex=0, mapParams }) => {
     height: mapParams.height - layerPadding * 2
   }
   useEffect(() => {
-    if (Object.entries(globalStore.interactive.dict.peek()).filter(([id, char]) => char.representation === 'A').length < 1) {
+    if (Object.entries(globalStore.interactive.dict.peek()).filter(([id, char]) => char.representation === 'A').length < 4) {
       const A = makeBug();
       addChar('interactive', A, globalStore);
     }

@@ -45,12 +45,9 @@ export const animate = (deltaTime, viewport, store, storeName, mapParams, id) =>
 
   if (type === CHARTYPES.BULLET)
     actOnNearestBug(char, globalStore.interactive.dict.get(), 400, (target) => {
-      const t = Date.now();
-      const explosion = createExplosion(target, globalStore);
-      console.log(`creating explosion ${explosion.id} Date.now()=${t}`)
+      createExplosion(target, globalStore);
       dropChar(storeName, target.id, store);
       dropChar(storeName, char.id, store)
-      
     });
 
   // Movement

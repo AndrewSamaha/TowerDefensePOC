@@ -153,19 +153,9 @@ const Frag = observer(({ explosionId, fragId, mapParams }) => {
 })
 
 export const createExplosion = ({ pos }, store) => {
-    // const explosion = {
-    //     ...makeChar(),
-    //     pos,
-    //     frags: {
-    //         a: makeFrag('a', pos),    
-    //     },
-    //     test: 'wawa'
-    // };
-    //addChar('independent', explosion, store);
-
-    addChar('independent', makeFrag(pos), store);
-    // addChar('independent', makeFrag(pos), store);
-    // addChar('independent', makeFrag(pos), store);
+    for (let x = 1; x <= Math.random()*4; x++) {
+        addChar('independent', makeFrag(pos), store);
+    }
     return { id: 'justFrags' };
 }
 
