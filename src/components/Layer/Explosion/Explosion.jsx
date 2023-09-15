@@ -12,6 +12,7 @@ import { rndSpeed, rndDir, straightLineMove } from '../../../helpers/physics';
 import { softClamp } from '../../../helpers/math';
 import { worldXtoScreenX, worldYtoScreenY } from "../../../helpers/viewport";
 import { globalStore } from "../../../state/globalStore";
+import { MAX_FRAGS, MIN_FRAGS } from "../../../constants/frags";
 
 // enableLegendStateReact()
 
@@ -40,8 +41,6 @@ import { globalStore } from "../../../state/globalStore";
 // };
 
 const dropFrag = (obs, id) => {
-    //console.log(`dropFrag id=[${id}] ${JSON.stringify(obs[id].peek())}`)
-    //console.log(`post omit=[${JSON.stringify(omit(obs.peek(), id))}]`)
     const numKeys = Object.keys(obs.peek()).length;
     const omitted = obs[id].peek();
     obs.set(omit(obs.peek(), id))
@@ -153,7 +152,7 @@ const Frag = observer(({ explosionId, fragId, mapParams }) => {
 })
 
 export const createExplosion = ({ pos }, store) => {
-    for (let x = 1; x <= Math.random()*4; x++) {
+    for (let x = 1; x <= Math.floor(Math.random()*MAX_FRAGS)+MIN_FRAGS; x++) {
         addChar('independent', makeFrag(pos), store);
     }
     return { id: 'justFrags' };
