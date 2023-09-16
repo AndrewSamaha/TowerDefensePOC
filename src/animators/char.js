@@ -1,6 +1,5 @@
 import Victor from 'victor';
 
-//import { dropChar, addChar } from '../../../state/chars';
 import { dropChar, addChar } from '../state/chars';
 import { MOVETYPES, CHARTYPES, makeBullet } from '../generators/units';
 import { rndDirNudge, rndSpeedNudge, straightLineMove } from '../helpers/physics';
@@ -13,7 +12,7 @@ export const animate = (deltaTime, viewport, store, storeName, mapParams, id) =>
 
   if (!char) return;
   
-  const { pos, representation, moves, moveType, maxAge, history, shoots, shotsPerSecond, type, lastFireTime } = char;
+  const { pos, moves, moveType, maxAge, history, shoots, shotsPerSecond, type, lastFireTime } = char;
   const {x, y, dir, speed} = pos; 
 
   // Age

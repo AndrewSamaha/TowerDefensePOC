@@ -1,25 +1,11 @@
-import React, { useState, useEffect, useSelector } from 'react'
-import Victor from 'victor';
-import useInterval from 'react-useinterval';
+import React from 'react'
 import { enableReactUse } from '@legendapp/state/config/enableReactUse';
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import { Layer } from './components/Layer/Layer'
-import { rndSpeed, rndDir, rndPos } from './helpers/physics'
 import { GAME_SIZE } from './constants/game'
-import { makeBug, makeTower } from './generators/units'
 import './App.css'
-import { useObservable } from '@legendapp/state/react';
-import { observable } from '@legendapp/state';
 import { VIEWPORT_KEYS } from './constants/input';
-import { hardClamp } from './helpers/math';
 import { useAnimationFrame } from '@haensl/react-hooks';
-
-import { createInitialViewportState } from './state/viewport';
-import { createInitialGameState } from './state/chars';
 import { globalStore } from './state/globalStore';
-//import { animate } from './components/Layer/Char/Char';
-import { animate } from './animators/char';
 
 const layer = {
   zIndex: 0,
@@ -27,22 +13,14 @@ const layer = {
 }
 
 const mapParams = GAME_SIZE;
-enableReactUse();
-const PUSH_FORCE = 0.1;
-const MAX_FORCE = 1;
 const MIN_VIEWPORT_SPEED = 0.1;
 const VIEWPORT_FRICTION = 0.997;
-const PX_PER_MS = .250;
 
-
-
+enableReactUse();
 
 function App() {
   
   useAnimationFrame((delta) => {
-    
-    //if (Math.random() > .94) console.log(`useAnimationFrame ${globalStore.interactive.idArray.peek().length} ${Date.now()}`);
-    // Animate Viewport
     (() => {
       // apply friction to speed
       globalStore.viewport.pos.speed.set((speed) => Math.abs(speed) < MIN_VIEWPORT_SPEED ? 0 : speed*VIEWPORT_FRICTION);
@@ -50,7 +28,7 @@ function App() {
       globalStore.viewport.convertKeysToForce(Date.now());
       if (globalStore.viewport.force.peek().lengthSq() < .01) {
         //console.log('force too small', globalStore.viewport.force.peek(), globalStore.viewport.pos.x.peek())
-        return
+        return;
       }
       // convert forces to translation
       globalStore.viewport.moveViewport(delta);
@@ -66,12 +44,6 @@ function App() {
       if (animate) animate(delta, globalStore.viewport, globalStore, 'independent', mapParams, id)
     })
 
-    // //console.log(`mainAnimationLoop ${Date.now()}`)
-    // globalStore.independent.idArray.peek().map((id) => {
-    //   //console.log(' calling char.animate')
-    //   animate(delta, globalStore.viewport, globalStore, 'independent', mapParams, id)
-    //   // (deltaTime, viewport, store, storeName, mapParams, id) => {
-    // });
   })
 
   return (
