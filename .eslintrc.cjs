@@ -15,6 +15,14 @@ module.exports = {
     'react-refresh'
   ],
   rules: {
+    'no-unused-vars': [
+      "warn",
+      {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+      }
+    ],
     'react-refresh/only-export-components': [
       'warn',
       { allowConstantExport: true },

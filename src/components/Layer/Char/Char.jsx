@@ -1,9 +1,6 @@
-import React, { useState } from 'react';
-import { useAnimationFrame } from '@haensl/react-hooks';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { observer } from "@legendapp/state/react"
-import Victor from 'victor';
-import first from 'lodash/first';
 
 import { worldXtoScreenX, worldYtoScreenY } from '../../../helpers/viewport';
 import { globalStore } from '../../../state/globalStore';
@@ -14,8 +11,8 @@ export const Char = observer(({ id, viewport }) => {
   if (!char) // handle the situation when char is null (it's been deleted)
     return (<div style={{display: 'none'}} />)
 
-  const { pos, representation, moves, moveType, maxAge, history, shoots, shotsPerSecond, type } = char;
-  const {x, y, dir, speed} = pos; 
+  const { pos, representation } = char;
+  const { x, y, dir } = pos; 
 
   return (
     <div 
