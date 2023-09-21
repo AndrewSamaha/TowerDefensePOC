@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { rndPos, rndSpeed, rndDir } from "../helpers/physics";
 import { animate } from '../animators/char';
 import { animate as animateFrag } from '../animators/frag';
+import { addChar } from '../state/chars';
+import { MAX_FRAGS, MIN_FRAGS } from '../constants/frags';
 
 export const CHARTYPES = {
     NONE: 'NONE',
@@ -82,3 +84,10 @@ export const makeFrag = ({ x, y }) => {
         animate: animateFrag
     }
 };
+
+export const createExplosion = ({ pos }, store) => {
+    for (let x = 1; x <= Math.floor(Math.random()*MAX_FRAGS)+MIN_FRAGS; x++) {
+        addChar('independent', makeFrag(pos), store);
+    }
+    return { id: 'justFrags' };
+}

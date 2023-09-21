@@ -5,7 +5,7 @@ import { MOVETYPES, CHARTYPES, makeBullet } from '../generators/units';
 import { rndDirNudge, rndSpeedNudge, straightLineMove } from '../helpers/physics';
 import { actOnNearestBug } from '../helpers/interaction';
 import { globalStore } from '../state/globalStore';
-import { createExplosion } from '../components/Layer/Explosion/Explosion';
+import { createExplosion } from '../generators/units';
 
 export const animate = (deltaTime, viewport, store, storeName, mapParams, id) => {
   const char = store.interactive.dict[id].get();

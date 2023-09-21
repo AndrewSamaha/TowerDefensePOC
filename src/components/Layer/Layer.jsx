@@ -55,7 +55,8 @@ export const Layer = observer(({ zIndex=0, mapParams }) => {
         width: `${mapParams.width}px`,
         height: `${mapParams.height}px`,
         padding: `${layerPadding}px`,
-        margin: '0'
+        margin: '0',
+        overflow: 'hidden'
         }}>
           {
             

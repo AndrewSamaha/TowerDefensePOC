@@ -18,11 +18,6 @@ export const straightLineMove = (pos, mapParams, delta) => {
     x += pos.x;
     y += pos.y;
 
-    if (x > mapParams.width) x = 0;
-    else if (x < 0) x = mapParams.width;
-
-    if (y > mapParams.height) y = 0;
-    else if (y < 0) y = mapParams.height;
     return {
         x,
         y,
