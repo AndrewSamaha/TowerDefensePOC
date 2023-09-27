@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { enableReactUse } from '@legendapp/state/config/enableReactUse';
 import { Layer } from './components/Layer/Layer'
 import { GAME_SIZE } from './constants/game'
@@ -19,7 +19,13 @@ const VIEWPORT_FRICTION = 0.997;
 enableReactUse();
 
 function App() {
-  
+  useEffect(() => {
+    const handleKeyDown = (e) => VIEWPORT_KEYS.includes(e.code) && !e.repeat ? globalStore.viewport.input[e.code].set(Date.now) : 0;
+    const handleKeyUp = (e) => VIEWPORT_KEYS.includes(e.code) && !e.repeat ? globalStore.viewport.input[e.code].set(0) : 0;
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+  }, []);
+
   useAnimationFrame((delta) => {
     (() => {
       // apply friction to speed
@@ -48,9 +54,7 @@ function App() {
 
   return (
     <div
-      onKeyDown={e => VIEWPORT_KEYS.includes(e.code) && !e.repeat ? globalStore.viewport.input[e.code].set(Date.now) : 0}
-      onKeyUp={e => VIEWPORT_KEYS.includes(e.code) && !e.repeat ? globalStore.viewport.input[e.code].set(0) : 0}
-      tabIndex={0} >
+       >
       <Layer zIndex={layer.zIndex} clickable={layer.clickable} mapParams={mapParams}/>
     </div>
   )
